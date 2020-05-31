@@ -558,7 +558,7 @@ def cmd_login(user, passwd):
     with request(login_data['auth_url'], delay=0) as page:
         etree = html5lib.parse(page, namespaceHTMLElements=False)
         # Bail if we find a request for a reCAPTCHA
-        if len(etree.findall('.//div[@class="g-recaptcha"]')) > 0:
+        if len(etree.findall('.//div[@class="g-recaptcha form__recaptcha"]')) > 0:
             error("cannot continue, gog is asking for a reCAPTCHA :(  try again in a few minutes.")
             return
         for elm in etree.findall('.//input'):
@@ -630,9 +630,12 @@ def cmd_update(os_list, lang_list, skipknown, updateonly, id):
             info('fetching game product data (page %d)...' % i)
         else:
             info('fetching game product data (page %d / %d)...' % (i, json_data['totalPages']))
-        with request(api_url, args={'mediaType': media_type,
-                                    'sortBy': 'title',  # sort order
-                                    'page': str(i)}, delay=0) as data_request:
+
+        url = api_url + "?" + urlencode({'mediaType': media_type,
+                                         'sortBy': 'title',
+                                         'page': str(i)})
+
+        with request(url, delay=0) as data_request:
             reader = codecs.getreader("utf-8")
             try:
                 json_data = json.load(reader(data_request))
